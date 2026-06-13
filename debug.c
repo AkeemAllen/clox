@@ -1,4 +1,5 @@
 #include "debug.h"
+#include "lib/uthash.h"
 #include "value.h"
 #include <stdio.h>
 
@@ -53,3 +54,5 @@ int disassembleInstruction(Chunk *chunk, int offset) {
     return offset + 1;
   }
 }
+
+// int getLine(int index, Chunk *chunk) { return 0; }

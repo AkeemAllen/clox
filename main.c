@@ -1,6 +1,6 @@
-#include "chunk.h"
-#include "common.h"
-#include "debug.h"
+// #include "chunk.h"
+// #include "common.h"
+// #include "debug.h"
 #include "vm.h"
 #include <stdio.h>
 #include <stdlib.h>
