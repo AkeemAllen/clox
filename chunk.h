@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "value.h"
+#include "lib/uthash.h"
 
 typedef enum {
   OP_CONSTANT,
@@ -17,19 +18,14 @@ typedef enum {
 typedef struct {
   int lineNumber;
   int occurrences;
-} Line;
-
-typedef struct {
-  int count;
-  int capacity;
-  Line* lines;
-} LineArray;
+  UT_hash_handle hh;
+} LineInfo;
 
 typedef struct {
   int count;
   int capacity;
   uint8_t* code;
-  int* lines;
+  LineInfo* lines;
   ValueArray constants;
 } Chunk;
 

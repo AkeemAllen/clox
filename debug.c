@@ -1,7 +1,8 @@
 #include "debug.h"
-#include "lib/uthash.h"
 #include "value.h"
 #include <stdio.h>
+
+int getLine(int index, Chunk *chunk);
 
 void disassembleChunk(Chunk *chunk, const char *name) {
   printf("== %s ==\n", name);
@@ -27,10 +28,10 @@ static int simpleInstruction(const char *name, int offset) {
 int disassembleInstruction(Chunk *chunk, int offset) {
   printf("%04d \n", offset);
 
-  if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]) {
+  if (offset > 0 && getLine(offset, chunk) == getLine(offset - 1, chunk)) {
     printf("   | ");
   } else {
-    printf("%4d ", chunk->lines[offset]);
+    printf("%4d ", getLine(offset, chunk));
   }
 
   uint8_t instruction = chunk->code[offset];
@@ -55,4 +56,22 @@ int disassembleInstruction(Chunk *chunk, int offset) {
   }
 }
 
-// int getLine(int index, Chunk *chunk) { return 0; }
+int sort_lines(void *a, void *b) {
+  return ((LineInfo *)a)->lineNumber - ((LineInfo *)b)->lineNumber;
+}
+
+int getLine(int index, Chunk *chunk) {
+  HASH_SORT(chunk->lines, sort_lines);
+
+  int totalOccurrences = 0;
+
+  LineInfo *lineinfo;
+  for (lineinfo = chunk->lines; lineinfo != NULL;
+       lineinfo = lineinfo->hh.next) {
+    totalOccurrences += lineinfo->occurrences;
+    if (totalOccurrences > index) {
+      return lineinfo->lineNumber;
+    }
+  }
+  return 0;
+}
