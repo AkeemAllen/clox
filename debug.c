@@ -2,7 +2,7 @@
 #include "value.h"
 #include <stdio.h>
 
-int getLine(int index, Chunk *chunk);
+int getLineNumber(int index, Chunk *chunk);
 
 void disassembleChunk(Chunk *chunk, const char *name) {
   printf("== %s ==\n", name);
@@ -28,10 +28,11 @@ static int simpleInstruction(const char *name, int offset) {
 int disassembleInstruction(Chunk *chunk, int offset) {
   printf("%04d \n", offset);
 
-  if (offset > 0 && getLine(offset, chunk) == getLine(offset - 1, chunk)) {
+  if (offset > 0 &&
+      getLineNumber(offset, chunk) == getLineNumber(offset - 1, chunk)) {
     printf("   | ");
   } else {
-    printf("%4d ", getLine(offset, chunk));
+    printf("%4d ", getLineNumber(offset, chunk));
   }
 
   uint8_t instruction = chunk->code[offset];
@@ -60,7 +61,7 @@ int sort_lines(void *a, void *b) {
   return ((LineInfo *)a)->lineNumber - ((LineInfo *)b)->lineNumber;
 }
 
-int getLine(int index, Chunk *chunk) {
+int getLineNumber(int index, Chunk *chunk) {
   HASH_SORT(chunk->lines, sort_lines);
 
   int totalOccurrences = 0;

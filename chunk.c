@@ -18,8 +18,6 @@ void freeChunk(Chunk *chunk) {
   initChunk(chunk);
 }
 
-int getLine(Chunk *chunk, int index) { return 0; };
-
 LineInfo *findLine(int lineNumber, Chunk *chunk) {
   LineInfo *lineinfo;
   HASH_FIND_INT(chunk->lines, &lineNumber, lineinfo);
