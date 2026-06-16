@@ -47,5 +47,21 @@ void writeChunk(Chunk *chunk, uint8_t byte, int line) {
 
 int addConstant(Chunk *chunk, Value value) {
   writeValueArray(&chunk->constants, value);
+  // Consider if this returns index greater than one byte, i.e., greater than
+  // 256
   return chunk->constants.count - 1;
+}
+
+void writeConstant(Chunk *chunk, Value value, int line) {
+  int index = addConstant(chunk, value);
+
+  if (index > UINT8_MAX) {
+    writeChunk(chunk, OP_CONSTANT_LONG, line);
+    writeChunk(chunk, (uint8_t)(index >> 16), line);
+    writeChunk(chunk, (uint8_t)(index >> 8), line);
+    writeChunk(chunk, (uint8_t)index, line);
+  } else {
+    writeChunk(chunk, OP_CONSTANT, line);
+    writeChunk(chunk, (uint8_t)index, line);
+  }
 }
