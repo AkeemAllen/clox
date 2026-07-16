@@ -47,8 +47,6 @@ void writeChunk(Chunk *chunk, uint8_t byte, int line) {
 
 int addConstant(Chunk *chunk, Value value) {
   writeValueArray(&chunk->constants, value);
-  // Consider if this returns index greater than one byte, i.e., greater than
-  // 256
   return chunk->constants.count - 1;
 }
 

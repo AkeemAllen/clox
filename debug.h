@@ -3,7 +3,8 @@
 
 #include "chunk.h"
 
-void disassembleChunk(Chunk* chunk, const char* name);
-int disassembleInstruction(Chunk* chunk, int offset);
+void disassembleChunk(Chunk *chunk, const char *name);
+int disassembleInstruction(Chunk *chunk, int offset);
+int getLineNumber(int index, Chunk *chunk);
 
 #endif // !clox_debug_h

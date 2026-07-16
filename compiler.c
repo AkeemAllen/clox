@@ -2,6 +2,7 @@
 #include "chunk.h"
 #include "common.h"
 #include "scanner.h"
+#include "value.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -176,7 +177,7 @@ static void grouping() {
 
 static void number() {
   double value = strtod(parser.previous.start, NULL);
-  emitConstant(value);
+  emitConstant(NUMBER_VAL(value));
 }
 
 static void unary() {
