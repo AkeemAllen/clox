@@ -44,9 +44,12 @@ static void concatenate() {
   push(OBJ_VAL(result));
 }
 
-void initVM() { resetStack(); }
+void initVM() {
+  resetStack();
+  vm.objects = NULL;
+}
 
-void freeVM() {}
+void freeVM() { freeObjects(); }
 
 static InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
