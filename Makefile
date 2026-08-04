@@ -12,7 +12,7 @@ ifeq ($(DEBUG_PRINT_CODE), 1)
 	CFLAGS += -DDEBUG_PRINT_CODE
 endif
 
-SRCS = main.c chunk.c debug.c memory.c value.c vm.c scanner.c compiler.c object.c
+SRCS = main.c chunk.c debug.c memory.c value.c vm.c scanner.c compiler.c object.c table.c
 OBJS = $(SRCS:%.c=build/%.o)
 TARGET = build/clox
 
