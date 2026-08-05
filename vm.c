@@ -47,13 +47,13 @@ static void concatenate() {
 void initVM() {
   resetStack();
   vm.objects = NULL;
-  initTable(&vm.strings);
   initTable(&vm.globals);
+  initTable(&vm.strings);
 }
 
 void freeVM() {
-  freeTable(&vm.strings);
   freeTable(&vm.globals);
+  freeTable(&vm.strings);
   freeObjects();
 }
 
