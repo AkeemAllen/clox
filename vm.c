@@ -24,8 +24,8 @@ static void runtimeError(const char *format, ...) {
   fputs("\n", stderr);
 
   CallFrame *frame = &vm.frames[vm.frameCount - 1];
-  size_t index = frame->ip - frame->function->chunk.code - 1;
-  int line = frame->function->chunk.lines[instruction];
+  size_t instruction = frame->ip - frame->function->chunk.code - 1;
+  int line = frame->function->chunk.lines[instruction].lineNumber;
   fprintf(stderr, "[line %d] in script\n", line);
   resetStack();
 }
@@ -63,9 +63,9 @@ void freeVM() {
 
 static InterpretResult run() {
   CallFrame *frame = &vm.frames[vm.frameCount - 1];
-#define READ_BYTE() (*frame.ip++)
+#define READ_BYTE() (*frame->ip++)
 #define READ_SHORT()                                                           \
-  (frame.ip += 2, ((uint16_t)frame.ip[-2] << 8) | frame.ip[-1])
+  (frame->ip += 2, ((uint16_t)frame->ip[-2] << 8) | frame->ip[-1])
 #define READ_STRING() AS_STRING(READ_CONSTANT())
 #define READ_CONSTANT() (frame->function->chunk.constants.values[READ_BYTE()])
 #define BINARY_OP(valueType, op)                                               \
@@ -188,7 +188,7 @@ static InterpretResult run() {
     }
     case OP_GET_LOCAL: {
       uint8_t slot = READ_BYTE();
-      push(vm.stack[slot]);
+      push(frame->slots[slot]);
       break;
     }
     case OP_SET_LOCAL: {
