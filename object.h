@@ -26,6 +26,13 @@ typedef struct {
   ObjString *name;
 } ObjFunction;
 
+typedef Value (*NativeFn)(int argCount, Value *args);
+
+typedef struct {
+  Obj obj;
+  NativeFn fn;
+} ObjNative;
+
 struct ObjString {
   Obj obj;
   int length;

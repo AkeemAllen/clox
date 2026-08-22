@@ -4,7 +4,6 @@
 #include "object.h"
 #include "scanner.h"
 #include "value.h"
-#include <cstdint>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -149,7 +148,10 @@ static int emitJump(uint8_t instruction) {
   return currentChunk()->count - 2;
 }
 
-static void emitReturn() { emitByte(OP_RETURN); }
+static void emitReturn() {
+  emitByte(OP_NIL);
+  emitByte(OP_RETURN);
+}
 
 static uint8_t makeConstant(Value value) {
   int constant = addConstant(currentChunk(), value);
@@ -228,6 +230,7 @@ static void declaration();
 static void statement();
 static ParseRule *getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
+static uint8_t argumentList();
 
 static void binary(bool canAssign) {
   TokenType operatorType = parser.previous.type;
@@ -271,7 +274,7 @@ static void binary(bool canAssign) {
 }
 
 static void call(bool canAssign) {
-  uint8_t argCount = argmentList();
+  uint8_t argCount = argumentList();
   emitBytes(OP_CALL, argCount);
 }
 
@@ -542,6 +545,19 @@ static void printStatement() {
   emitByte(OP_PRINT);
 }
 
+static void returnStatement() {
+  if (current->type == TYPE_SCRIPT) {
+    error("Can't return from top-level code.");
+  }
+  if (match(TOKEN_SEMICOLON)) {
+    emitReturn();
+  } else {
+    expression();
+    consume(TOKEN_SEMICOLON, "Expect ';' after return value");
+    emitByte(OP_RETURN);
+  }
+}
+
 static void whileStatement() {
   int loopStart = currentChunk()->count;
   consume(TOKEN_LEFT_PAREN, "Expect '(' after 'while'");
@@ -597,6 +613,8 @@ static void statement() {
     printStatement();
   } else if (match(TOKEN_IF)) {
     ifStatement();
+  } else if (match(TOKEN_RETURN)) {
+    returnStatement();
   } else if (match(TOKEN_WHILE)) {
     whileStatement();
   } else if (match(TOKEN_FOR)) {
