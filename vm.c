@@ -9,8 +9,13 @@
 #include "value.h"
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 VM vm;
+
+static Value clockNative(int argCount, Value *args) {
+  return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
+}
 
 static void resetStack() {
   vm.stackTop = vm.stack;
@@ -36,6 +41,13 @@ static void runtimeError(const char *format, ...) {
     }
   }
   resetStack();
+}
+static void defineNative(const char *name, NativeFn function) {
+  push(OBJ_VAL(copyString(name, (int)strlen(name))));
+  push(OBJ_VAL(newNative(function)));
+  tableSet(&vm.globals, AS_STRING(vm.stack[0]), vm.stack[1]);
+  pop();
+  pop();
 }
 static Value peek(int distance);
 static bool callValue(Value callee, int argCount);
@@ -63,6 +75,8 @@ void initVM() {
   vm.objects = NULL;
   initTable(&vm.globals);
   initTable(&vm.strings);
+
+  defineNative("clock", clockNative);
 }
 
 void freeVM() {
@@ -75,7 +89,7 @@ static InterpretResult run() {
   CallFrame *frame = &vm.frames[vm.frameCount - 1];
 #define READ_BYTE() (*frame->ip++)
 #define READ_SHORT()                                                           \
-  (frame->ip += 2, ((uint16_t)frame->ip[-2] << 8) | frame->ip[-1])
+  (frame->ip += 2, (uint16_t)((frame->ip[-2] << 8) | frame->ip[-1]))
 #define READ_STRING() AS_STRING(READ_CONSTANT())
 #define READ_CONSTANT() (frame->function->chunk.constants.values[READ_BYTE()])
 #define BINARY_OP(valueType, op)                                               \
@@ -92,13 +106,15 @@ static InterpretResult run() {
   for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
     printf("              ");
-    for (Value *slot = vm.stack; slot < vm.stackTop; slot++) {
+    for (Value *slot = frame->slots;
+         slot < frame->slots + frame->function->arity; slot++) {
       printf("[ ");
       printValue(*slot);
       printf(" ]");
     }
     printf("\n");
-    disassembleInstruction(vm.chunk, (int)(vm.ip - vm.chunk->code));
+    disassembleInstruction(&frame->function->chunk,
+                           (int)(frame->ip - frame->function->chunk.code));
 #endif
     uint8_t instruction;
     switch (instruction = READ_BYTE()) {
@@ -162,9 +178,9 @@ static InterpretResult run() {
       break;
     }
     case OP_PRINT: {
-      disassembleInstruction(&frame->function->chunk,
-                             (int)(frame->ip - frame->function->chunk.code));
-      ;
+      printValue(pop());
+      printf("\n");
+      break;
       break;
     }
     case OP_POP:
@@ -280,6 +296,13 @@ static bool callValue(Value callee, int argCount) {
     switch (OBJ_TYPE(callee)) {
     case OBJ_FUNCTION:
       return call(AS_FUNCTION(callee), argCount);
+    case OBJ_NATIVE: {
+      NativeFn native = AS_NATIVE(callee);
+      Value result = native(argCount, vm.stackTop - argCount);
+      vm.stackTop -= argCount + 1;
+      push(result);
+      return true;
+    }
     default:
       break;
     }
@@ -299,7 +322,7 @@ static bool call(ObjFunction *function, int argCount) {
     return false;
   }
 
-  CallFrame *frame = &vm.frames[vm.frameCount - 1];
+  CallFrame *frame = &vm.frames[vm.frameCount++];
   frame->function = function;
   frame->ip = function->chunk.code;
   frame->slots = vm.stackTop - argCount - 1;

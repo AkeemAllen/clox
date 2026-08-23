@@ -130,7 +130,7 @@ static void emitBytes(uint8_t byte_1, uint8_t byte_2) {
   emitByte(byte_2);
 }
 
-static int emitLoop(int loopStart) {
+static void emitLoop(int loopStart) {
   emitByte(OP_LOOP);
 
   int offset = currentChunk()->count - loopStart + 2;
@@ -297,6 +297,7 @@ static void literal(bool canAssign) {
 static void parsePrecedence(Precedence precedence) {
   advance();
   ParseFn prefixRule = getRule(parser.previous.type)->prefix;
+
   if (prefixRule == NULL) {
     error("Expect expression.");
     return;
@@ -597,7 +598,7 @@ static void synchronize() {
 }
 
 static void declaration() {
-  if (match(TOKEN_FOR)) {
+  if (match(TOKEN_FUN)) {
     funDeclaration();
   } else if (match(TOKEN_VAR)) {
     varDeclaration();
@@ -697,7 +698,7 @@ static void unary(bool canAssign) {
 }
 
 ParseRule rules[] = {
-    [TOKEN_LEFT_PAREN] = {grouping, call, PREC_NONE},
+    [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
     [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
     [TOKEN_LEFT_BRACE] = {NULL, NULL, PREC_NONE},
     [TOKEN_RIGHT_BRACE] = {NULL, NULL, PREC_NONE},
