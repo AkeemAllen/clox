@@ -450,6 +450,7 @@ static void function(FunctionType type) {
 }
 
 static void funDeclaration() {
+  printf("funDeclaration\n");
   uint8_t global = parseVariable("Expect function name.");
   markInitialized();
   function(TYPE_FUNCTION);
