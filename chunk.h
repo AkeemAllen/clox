@@ -20,6 +20,7 @@ typedef enum {
   OP_LOOP,
   OP_POP,
   OP_CALL,
+  OP_CLOSURE,
   OP_NIL,
   OP_TRUE,
   OP_FALSE,
