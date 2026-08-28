@@ -47,6 +47,11 @@ typedef struct {
   int depth;
 } Local;
 
+typedef struct {
+  uint8_t index;
+  bool isLocal;
+} Upvalue;
+
 typedef enum {
   TYPE_SCRIPT,
   TYPE_FUNCTION,
@@ -59,6 +64,7 @@ typedef struct Compiler {
 
   Local locals[UINT8_COUNT];
   int localCount;
+  Upvalue upvalues[UINT8_COUNT];
   int scopeDepth;
 } Compiler;
 
@@ -136,6 +142,10 @@ static uint8_t identifierConstant(Token *name);
 static bool identifiersEqual(Token *a, Token *b);
 
 static int resolveLocal(Compiler *compiler, Token *name);
+
+static int addUpValue(Compiler *compiler, uint8_t index, bool isLocal);
+
+static int resolveUpValue(Compiler *compiler, Token *name);
 
 static void addLocal(Token name);
 
@@ -468,6 +478,9 @@ static void namedVariable(Token name, bool canAssign) {
   if (arg != -1) {
     getOp = OP_GET_LOCAL;
     setOp = OP_SET_LOCAL;
+  } else if ((arg = resolveUpValue(current, &name)) != -1) {
+    getOp = OP_GET_UPVALUE;
+    setOp = OP_SET_UPVALUE;
   } else {
     arg = identifierConstant(&name);
     getOp = OP_GET_GLOBAL;
@@ -558,6 +571,37 @@ static int resolveLocal(Compiler *compiler, Token *name) {
       }
       return i;
     }
+  }
+
+  return -1;
+}
+
+static int addUpValue(Compiler *compiler, uint8_t index, bool isLocal) {
+  int upValueCount = compiler->function->upvalueCount;
+
+  for (int i = 0; i < upValueCount; i++) {
+    Upvalue *upvalue = &compiler->upvalues[i];
+    if (upvalue->index == index && upvalue->isLocal == isLocal) {
+      return i;
+    }
+  }
+
+  if (upValueCount == UINT8_COUNT) {
+    error("Too many closure variables in function");
+    return 0;
+  }
+
+  compiler->upvalues[upValueCount].isLocal = isLocal;
+  compiler->upvalues[upValueCount].index = index;
+  return compiler->function->upvalueCount++;
+}
+
+static int resolveUpValue(Compiler *compiler, Token *name) {
+  if (compiler->enclosing == NULL)
+    return -1;
+  int local = resolveLocal(compiler->enclosing, name);
+  if (local != -1) {
+    return addUpValue(compiler, (uint8_t)local, true);
   }
 
   return -1;
