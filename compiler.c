@@ -577,28 +577,30 @@ static int resolveLocal(Compiler *compiler, Token *name) {
 }
 
 static int addUpvalue(Compiler *compiler, uint8_t index, bool isLocal) {
-  int upValueCount = compiler->function->upvalueCount;
+  int upvalueCount = compiler->function->upvalueCount;
 
-  for (int i = 0; i < upValueCount; i++) {
+  for (int i = 0; i < upvalueCount; i++) {
     Upvalue *upvalue = &compiler->upvalues[i];
     if (upvalue->index == index && upvalue->isLocal == isLocal) {
       return i;
     }
   }
 
-  if (upValueCount == UINT8_COUNT) {
+  if (upvalueCount == UINT8_COUNT) {
     error("Too many closure variables in function");
     return 0;
   }
 
-  compiler->upvalues[upValueCount].isLocal = isLocal;
-  compiler->upvalues[upValueCount].index = index;
+  compiler->upvalues[upvalueCount].isLocal = isLocal;
+  compiler->upvalues[upvalueCount].index = index;
+
   return compiler->function->upvalueCount++;
 }
 
 static int resolveUpvalue(Compiler *compiler, Token *name) {
-  if (compiler->enclosing == NULL)
+  if (compiler->enclosing == NULL) {
     return -1;
+  }
   int upvalue = resolveUpvalue(compiler->enclosing, name);
   if (upvalue != -1) {
     return addUpvalue(compiler, (uint8_t)upvalue, false);

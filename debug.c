@@ -107,9 +107,9 @@ int disassembleInstruction(Chunk *chunk, int offset) {
   case OP_SET_GLOBAL:
     return constantInstruction("OP_SET_GLOBAL", chunk, offset);
   case OP_GET_UPVALUE:
-    return byteInstruction("OP_GET_GLOBAL", chunk, offset);
+    return byteInstruction("OP_GET_UPVALUE", chunk, offset);
   case OP_SET_UPVALUE:
-    return byteInstruction("OP_SET_GLOBAL", chunk, offset);
+    return byteInstruction("OP_SET_UPVALUE", chunk, offset);
   case OP_JUMP_IF_FALSE:
     return jumpInstruction("OP_JUMP_IF_FALSE", 1, chunk, offset);
   case OP_JUMP:

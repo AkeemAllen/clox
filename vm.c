@@ -108,14 +108,15 @@ static InterpretResult run() {
 #ifdef DEBUG_TRACE_EXECUTION
     printf("              ");
     for (Value *slot = frame->slots;
-         slot < frame->slots + frame->function->arity; slot++) {
+         slot < frame->slots + frame->closure->function->arity; slot++) {
       printf("[ ");
       printValue(*slot);
       printf(" ]");
     }
     printf("\n");
-    disassembleInstruction(&frame->closure->function->chunk,
-                           (int)(frame->ip - frame->function->chunk.code));
+    disassembleInstruction(
+        &frame->closure->function->chunk,
+        (int)(frame->ip - frame->closure->function->chunk.code));
 #endif
     uint8_t instruction;
     switch (instruction = READ_BYTE()) {
