@@ -33,8 +33,8 @@ clean:
 	rm -rf build
 
 debug: CFLAGS += -DDEBUG_TRACE_EXECUTION -DDEBUG_PRINT_CODE
-debug-trace: CFLAGS += -DDEBUG_TRACE_EXECUTION
-debug-print: CFLAGS += -DDEBUG_PRINT_CODE
+debug-trace: CFLAGS += -DDEBUG_TRACE_EXECUTION -g
+debug-print: CFLAGS += -DDEBUG_PRINT_CODE -g
 debug: clean $(TARGET)
 debug-trace: clean $(TARGET)
 debug-print: clean $(TARGET)

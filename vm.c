@@ -7,6 +7,7 @@
 #include "object.h"
 #include "stdarg.h"
 #include "value.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -51,6 +52,7 @@ static void defineNative(const char *name, NativeFn function) {
 }
 static Value peek(int distance);
 static bool callValue(Value callee, int argCount);
+static ObjUpvalue *captureUpvalue(Value *local);
 static bool call(ObjClosure *closure, int argCount);
 static bool isFalsey(Value value) {
   return IS_NIL(value) || IS_BOOL(value) && !AS_BOOL(value);
@@ -224,6 +226,17 @@ static InterpretResult run() {
       frame->slots[slot] = peek(0);
       break;
     }
+    case OP_GET_UPVALUE: {
+      uint8_t slot = READ_BYTE();
+      push(*frame->closure->upvalues[slot]->location);
+      break;
+    }
+    case OP_SET_UPVALUE: {
+      printf("OP_SET_UPVALUE called");
+      uint8_t slot = READ_BYTE();
+      *frame->closure->upvalues[slot]->location = peek(0);
+      break;
+    }
     case OP_JUMP_IF_FALSE: {
       uint16_t offset = READ_SHORT();
       if (isFalsey(peek(0)))
@@ -252,6 +265,15 @@ static InterpretResult run() {
       ObjFunction *function = AS_FUNCTION(READ_CONSTANT());
       ObjClosure *closure = newClosure(function);
       push(OBJ_VAL(closure));
+      for (int i = 0; i < closure->upvalueCount; i++) {
+        uint8_t isLocal = READ_BYTE();
+        uint8_t index = READ_BYTE();
+        if (isLocal) {
+          closure->upvalues[i] = captureUpvalue(frame->slots + index);
+        } else {
+          closure->upvalues[i] = frame->closure->upvalues[index];
+        }
+      }
       break;
     }
     case OP_RETURN: {
@@ -320,6 +342,11 @@ static bool callValue(Value callee, int argCount) {
   }
   runtimeError("Can only call functions and classes.");
   return false;
+}
+
+static ObjUpvalue *captureUpvalue(Value *local) {
+  ObjUpvalue *createdUpvalue = newUpvalue(local);
+  return createdUpvalue;
 }
 
 static bool call(ObjClosure *closure, int argCount) {

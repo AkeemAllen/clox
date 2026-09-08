@@ -567,7 +567,6 @@ static int resolveLocal(Compiler *compiler, Token *name) {
     if (identifiersEqual(name, &local->name)) {
       if (local->depth == -1) {
         error("Can't read local variable in its own initializer");
-        return -1;
       }
       return i;
     }
@@ -601,6 +600,12 @@ static int resolveUpvalue(Compiler *compiler, Token *name) {
   if (compiler->enclosing == NULL) {
     return -1;
   }
+
+  int local = resolveLocal(compiler->enclosing, name);
+  if (local != -1) {
+    return addUpvalue(compiler, (uint8_t)local, true);
+  }
+
   int upvalue = resolveUpvalue(compiler->enclosing, name);
   if (upvalue != -1) {
     return addUpvalue(compiler, (uint8_t)upvalue, false);
