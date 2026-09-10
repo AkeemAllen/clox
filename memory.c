@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "memory.h"
@@ -17,6 +18,7 @@ void *reallocate(void *pointer, size_t oldSize, size_t newSize) {
 }
 
 static void freeObject(Obj *object) {
+  printf("Freeing Object");
   switch (object->type) {
   case OBJ_FUNCTION: {
     ObjFunction *function = (ObjFunction *)object;
@@ -48,6 +50,8 @@ static void freeObject(Obj *object) {
 }
 
 void freeObjects() {
+
+  printf("Freeing Objects");
   Obj *object = vm.objects;
   while (object != NULL) {
     Obj *next = object->next;
