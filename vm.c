@@ -12,6 +12,8 @@
 #include <string.h>
 #include <time.h>
 
+static void closeUpvalues(Value *last);
+
 VM vm;
 
 static Value clockNative(int argCount, Value *args) {
@@ -278,8 +280,14 @@ static InterpretResult run() {
       }
       break;
     }
+    case OP_CLOSE_UPVALUE: {
+      closeUpvalues(vm.stackTop - 1);
+      pop();
+      break;
+    }
     case OP_RETURN: {
       Value result = pop();
+      closeUpvalues(frame->slots);
       vm.frameCount--;
       if (vm.frameCount == 0) {
         pop();
@@ -366,6 +374,15 @@ static ObjUpvalue *captureUpvalue(Value *local) {
     prevUpvalue->next = createdUpvalue;
   }
   return createdUpvalue;
+}
+
+static void closeUpvalues(Value *last) {
+  while (vm.openUpvalues != NULL && vm.openUpvalues->location >= last) {
+    ObjUpvalue *upvalue = vm.openUpvalues;
+    upvalue->closed = *upvalue->location;
+    upvalue->location = &upvalue->closed;
+    vm.openUpvalues = upvalue->next;
+  }
 }
 
 static bool call(ObjClosure *closure, int argCount) {
