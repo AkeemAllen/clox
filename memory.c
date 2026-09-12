@@ -18,7 +18,6 @@ void *reallocate(void *pointer, size_t oldSize, size_t newSize) {
 }
 
 static void freeObject(Obj *object) {
-  printf("Freeing Object");
   switch (object->type) {
   case OBJ_FUNCTION: {
     ObjFunction *function = (ObjFunction *)object;
@@ -41,8 +40,6 @@ static void freeObject(Obj *object) {
     break;
   }
   case OBJ_UPVALUE: {
-    ObjClosure *closure = (ObjClosure *)object;
-    FREE_ARRAY(ObjUpvalue *, closure->upvalues, closure->upvalueCount);
     FREE(ObjUpvalue, object);
     break;
   }
@@ -50,8 +47,6 @@ static void freeObject(Obj *object) {
 }
 
 void freeObjects() {
-
-  printf("Freeing Objects");
   Obj *object = vm.objects;
   while (object != NULL) {
     Obj *next = object->next;

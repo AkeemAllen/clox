@@ -15,7 +15,6 @@ void initTable(Table *table) {
 }
 
 void freeTable(Table *table) {
-  printf("Freeing table");
   FREE_ARRAY(Entry, table->entries, table->capacity);
   initTable(table);
 }

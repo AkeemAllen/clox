@@ -85,7 +85,6 @@ void initVM() {
 }
 
 void freeVM() {
-  printf("Freeing VM");
   freeTable(&vm.globals);
   freeTable(&vm.strings);
   freeObjects();
@@ -236,7 +235,6 @@ static InterpretResult run() {
       break;
     }
     case OP_SET_UPVALUE: {
-      printf("OP_SET_UPVALUE called");
       uint8_t slot = READ_BYTE();
       *frame->closure->upvalues[slot]->location = peek(0);
       break;
