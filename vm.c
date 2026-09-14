@@ -1,4 +1,4 @@
-#include "vm.h"
+#include "vm.h" #include "vm.h"
 #include "chunk.h"
 #include "common.h"
 #include "compiler.h"
@@ -78,6 +78,9 @@ static void concatenate() {
 void initVM() {
   resetStack();
   vm.objects = NULL;
+  vm.grayStack = NULL;
+  vm.grayCapacity = 0;
+  vm.grayCount = 0;
   initTable(&vm.globals);
   initTable(&vm.strings);
 
