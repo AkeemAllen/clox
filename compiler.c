@@ -930,7 +930,7 @@ ObjFunction *compile(const char *source) {
 }
 
 void markCompilerRoots() {
-  Compiler *compiler;
+  Compiler *compiler = current;
   while (compiler != NULL) {
     markObject((Obj *)compiler->function);
     compiler = compiler->enclosing;
