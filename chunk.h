@@ -19,6 +19,7 @@ typedef enum {
   OP_SET_UPVALUE,
   OP_CLOSE_UPVALUE,
   OP_JUMP_IF_FALSE,
+  OP_CLASS,
   OP_JUMP,
   OP_LOOP,
   OP_POP,

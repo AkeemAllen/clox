@@ -141,6 +141,8 @@ int disassembleInstruction(Chunk *chunk, int offset) {
     return simpleInstruction("OP_POP", offset);
   case OP_PRINT:
     return simpleInstruction("OP_PRINT", offset);
+  case OP_CLASS:
+    return constantInstruction("OP_CLASS", chunk, offset);
   case OP_RETURN:
     return simpleInstruction("OP_RETURN", offset);
   default:

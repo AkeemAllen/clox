@@ -290,6 +290,10 @@ static InterpretResult run() {
       pop();
       break;
     }
+    case OP_CLASS: {
+      push(OBJ_VAL(newClass(READ_STRING())));
+      break;
+    }
     case OP_RETURN: {
       Value result = pop();
       closeUpvalues(frame->slots);
