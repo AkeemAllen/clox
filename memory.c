@@ -30,10 +30,12 @@ void *reallocate(void *pointer, size_t oldSize, size_t newSize) {
 }
 
 void markObject(Obj *object) {
-  if (object == NULL)
+  if (object == NULL) {
     return;
-  if (object->isMarked)
+  }
+  if (object->isMarked) {
     return;
+  }
 
 #ifdef DEBUG_LOG_GC
   printf("%p mark ", (void *)object);
@@ -47,11 +49,11 @@ void markObject(Obj *object) {
     vm.grayCapacity = GROW_CAPACITY(vm.grayCapacity);
     vm.grayStack =
         (Obj **)realloc(vm.grayStack, sizeof(Obj *) * vm.grayCapacity);
+
+    if (vm.grayStack == NULL)
+      exit(1);
   }
   vm.grayStack[vm.grayCount++] = object;
-
-  if (vm.grayStack == NULL)
-    exit(1);
 }
 
 void markValue(Value value) {
@@ -156,7 +158,6 @@ static void traceReferences() {
 static void sweep() {
   Obj *previous = NULL;
   Obj *object = vm.objects;
-
   while (object != NULL) {
     if (object->isMarked) {
       object->isMarked = false;
@@ -165,7 +166,6 @@ static void sweep() {
     } else {
       Obj *unreached = object;
       object = object->next;
-
       if (previous != NULL) {
         previous->next = object;
       } else {
@@ -184,8 +184,6 @@ void collectGarbage() {
 
   markRoots();
   traceReferences();
-
-  fprintf(stderr, "Mark compiler roots\n");
   tableRemoveWhite(&vm.strings);
   sweep();
 
