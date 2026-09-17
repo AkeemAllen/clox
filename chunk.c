@@ -14,7 +14,12 @@ void initChunk(Chunk *chunk) {
 
 void freeChunk(Chunk *chunk) {
   FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
-  FREE_ARRAY(int, chunk->lines, chunk->capacity);
+  LineInfo *lineinfo, *tmp;
+  HASH_ITER(hh, chunk->lines, lineinfo, tmp) {
+    HASH_DEL(chunk->lines, lineinfo);
+    free(lineinfo);
+  }
+
   freeValueArray(&chunk->constants);
   initChunk(chunk);
 }

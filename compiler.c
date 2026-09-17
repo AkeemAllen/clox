@@ -5,7 +5,6 @@
 #include "object.h"
 #include "scanner.h"
 #include "value.h"
-#include <cstdint>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

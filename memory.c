@@ -20,10 +20,9 @@ void *reallocate(void *pointer, size_t oldSize, size_t newSize) {
 #ifdef DEBUG_STRESS_GC
     collectGarbage();
 #endif
-  }
-
-  if (vm.bytesAllocated > vm.nextGC) {
-    collectGarbage();
+    if (vm.bytesAllocated > vm.nextGC) {
+      collectGarbage();
+    }
   }
 
   if (newSize == 0) {
@@ -96,6 +95,12 @@ static void blackenObject(Obj *object) {
     markArray(&function->chunk.constants);
     break;
   }
+  case OBJ_INSTANCE: {
+    ObjInstance *instance = (ObjInstance *)object;
+    markObject((Obj *)instance->klass);
+    markTable(&instance->fields);
+    break;
+  }
   case OBJ_CLASS: {
     ObjClass *klass = (ObjClass *)object;
     markObject((Obj *)klass->name);
@@ -128,8 +133,15 @@ static void freeObject(Obj *object) {
     FREE(ObjString, object);
     break;
   }
+  case OBJ_INSTANCE: {
+    ObjInstance *instance = (ObjInstance *)object;
+    freeTable(&instance->fields);
+    FREE(ObjInstance, object);
+    break;
+  }
   case OBJ_NATIVE: {
-    FREE(ObjNative, object);
+    // FREE(ObjNative, object);
+    reallocate(object, sizeof(ObjNative), 0);
     break;
   }
   case OBJ_CLOSURE: {
@@ -179,6 +191,7 @@ static void sweep() {
     if (object->isMarked) {
       object->isMarked = false;
       previous = object;
+      fprintf(stderr, "Object type: %d\n", object->isMarked);
       object = object->next;
     } else {
       Obj *unreached = object;
