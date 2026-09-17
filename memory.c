@@ -191,7 +191,6 @@ static void sweep() {
     if (object->isMarked) {
       object->isMarked = false;
       previous = object;
-      fprintf(stderr, "Object type: %d\n", object->isMarked);
       object = object->next;
     } else {
       Obj *unreached = object;

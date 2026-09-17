@@ -26,7 +26,6 @@ static Obj *allocateObject(size_t size, ObjType type) {
 }
 
 ObjClass *newClass(ObjString *name) {
-  fprintf(stderr, "New Class\n");
   ObjClass *klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
   klass->name = name;
   return klass;
@@ -56,7 +55,6 @@ ObjFunction *newFunction() {
 }
 
 ObjInstance *newInstance(ObjClass *klass) {
-  fprintf(stderr, "New Instance\n");
   ObjInstance *instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
   instance->klass = klass;
   initTable(&instance->fields);
