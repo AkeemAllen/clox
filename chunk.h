@@ -22,6 +22,7 @@ typedef enum {
   OP_SET_PROPERTY,
   OP_GET_PROPERTY,
   OP_CLASS,
+  OP_METHOD,
   OP_JUMP,
   OP_LOOP,
   OP_POP,
